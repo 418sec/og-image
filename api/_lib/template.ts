@@ -1,146 +1,127 @@
-
-import { readFileSync } from 'fs';
-import marked from 'marked';
-import { sanitizeHtml } from './sanitizer';
 import { ParsedRequest } from './types';
-const twemoji = require('twemoji');
-const twOptions = { folder: 'svg', ext: '.svg' };
-const emojify = (text: string) => twemoji.parse(text, twOptions);
 
-const rglr = readFileSync(`${__dirname}/../_fonts/Inter-Regular.woff2`).toString('base64');
-const bold = readFileSync(`${__dirname}/../_fonts/Inter-Bold.woff2`).toString('base64');
-const mono = readFileSync(`${__dirname}/../_fonts/Vera-Mono.woff2`).toString('base64');
-
-function getCss(theme: string, fontSize: string) {
-    let background = 'white';
-    let foreground = 'black';
-    let radial = 'lightgray';
-
-    if (theme === 'dark') {
-        background = 'black';
-        foreground = 'white';
-        radial = 'dimgray';
-    }
+function getCss() {
     return `
-    @font-face {
-        font-family: 'Inter';
-        font-style:  normal;
-        font-weight: normal;
-        src: url(data:font/woff2;charset=utf-8;base64,${rglr}) format('woff2');
-    }
-
-    @font-face {
-        font-family: 'Inter';
-        font-style:  normal;
-        font-weight: bold;
-        src: url(data:font/woff2;charset=utf-8;base64,${bold}) format('woff2');
-    }
-
-    @font-face {
-        font-family: 'Vera';
-        font-style: normal;
-        font-weight: normal;
-        src: url(data:font/woff2;charset=utf-8;base64,${mono})  format("woff2");
+    body {
+        font-family: "Lato", serif;
+        background-color: black;
+        color: white;
+        padding: 32px;
+        padding-right: 0px;
+        position: relative;
       }
 
-    body {
-        background: ${background};
-        background-image: radial-gradient(circle at 25px 25px, ${radial} 2%, transparent 0%), radial-gradient(circle at 75px 75px, ${radial} 2%, transparent 0%);
-        background-size: 100px 100px;
-        height: 100vh;
+      .caption {
+        opacity: 70%;
+        font-size: small;
+        margin: 0;
+      }
+
+      .cve {
+        border-radius: 4px;
+        padding: 2px 10px;
+        display: inline-block;
+        font-size: small;
+        margin: 0;
+      }
+
+      .cwe {
+        font-size: x-large;
+        margin: 0;
+        margin-bottom: 10px;
+      }
+
+      .left-side {
+        width: 66%;
+      }
+
+      .wrapper {
         display: flex;
-        text-align: center;
-        align-items: center;
-        justify-content: center;
-    }
+        flex-direction: row;
+      }
 
-    code {
-        color: #D400FF;
-        font-family: 'Vera';
-        white-space: pre-wrap;
-        letter-spacing: -5px;
-    }
+      .mouse {
+        height: 150px;
+        opacity: 20%;
+        position: absolute;
+        right: -25px;
+        z-index: -1;
+      }
 
-    code:before, code:after {
-        content: '\`';
-    }
+      .author {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: small;
+        margin-bottom: 0;
+        margin-top: 20px;
+      }
+      
+      .name {
+        color: rgb(255, 255, 255);
+      }`;
+}
 
-    .logo-wrapper {
-        display: flex;
-        align-items: center;
-        align-content: center;
-        justify-content: center;
-        justify-items: center;
+function getSeverityColour(score: Number) {
+    switch (true) {
+        case score > 7.5:
+            return '#ff0000'
+        case score > 5.0:
+            return '#ff9d00'
+        case score > 2.5:
+            return '#fbff00'
+        default: 
+            return '#ffffff'
     }
-
-    .logo {
-        margin: 0 75px;
-    }
-
-    .plus {
-        color: #BBB;
-        font-family: Times New Roman, Verdana;
-        font-size: 100px;
-    }
-
-    .spacer {
-        margin: 150px;
-    }
-
-    .emoji {
-        height: 1em;
-        width: 1em;
-        margin: 0 .05em 0 .1em;
-        vertical-align: -0.1em;
-    }
-    
-    .heading {
-        font-family: 'Inter', sans-serif;
-        font-size: ${sanitizeHtml(fontSize)};
-        font-style: normal;
-        color: ${foreground};
-        line-height: 1.8;
-    }`;
 }
 
 export function getHtml(parsedReq: ParsedRequest) {
-    const { text, theme, md, fontSize, images, widths, heights } = parsedReq;
-    return `<!DOCTYPE html>
-<html>
-    <meta charset="utf-8">
-    <title>Generated Image</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        ${getCss(theme, fontSize)}
-    </style>
-    <body>
-        <div>
-            <div class="spacer">
-            <div class="logo-wrapper">
-                ${images.map((img, i) =>
-                    getPlusSign(i) + getImage(img, widths[i], heights[i])
-                ).join('')}
-            </div>
-            <div class="spacer">
-            <div class="heading">${emojify(
-                md ? marked(text) : sanitizeHtml(text)
-            )}
-            </div>
+    const { text, realName, username, cve, repoOwner, repoName, score } = parsedReq;
+    const severityColour = getSeverityColour(score);
+    const cveHtml =`<h1 class="cve" style="background-color: ${severityColour}49; border: 1.5px solid ${severityColour};">
+                        ${cve}
+                    </h1>`
+
+    let html = `<!DOCTYPE html>
+    <html>
+        <head>
+            <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Lato"/>
+            <meta charset="utf-8">
+            <title>huntr.dev</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                ${getCss()}
+            </style>
+        </head>
+        <body>
+        <div class="wrapper">
+          <div class="left-side">
+            <p class="caption">Security Advisory in ${repoOwner} / ${repoName}</p>
+            <h1 class="cwe">
+                ${text}
+            </h1>`
+            if(cve) html += cveHtml
+            html +=`
+          </div>
+          <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
         </div>
-    </body>
-</html>`;
-}
-
-function getImage(src: string, width ='auto', height = '225') {
-    return `<img
-        class="logo"
-        alt="Generated Image"
-        src="${sanitizeHtml(src)}"
-        width="${sanitizeHtml(width)}"
-        height="${sanitizeHtml(height)}"
-    />`
-}
-
-function getPlusSign(i: number) {
-    return i === 0 ? '' : '<div class="plus">+</div>';
+        <div
+          style="display: flex; flex-direction: row; width: 100%; margin-top: 10px"
+        >
+          <p class="author">
+            By @${username} (<span class="name">${realName}</span>)
+          </p>
+          <img
+            style="
+              border-radius: 100%;
+              width: 50px;
+              height: 50px;
+              margin-left: auto;
+            "
+            src="https://github.com/${username}.png"
+          />
+        </div>
+      </body>
+    </html>`
+    return html;
 }
