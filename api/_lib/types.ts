@@ -10,10 +10,4 @@ export interface ParsedRequest {
     repoOwner: string;
     repoName: string;
     score: Number;
-    // theme: Theme;
-    // md: boolean;
-    // fontSize: string;
-    // images: string[];
-    // widths: string[];
-    // heights: string[];
 }
