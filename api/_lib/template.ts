@@ -73,9 +73,9 @@ function getSeverityColour(score: Number) {
     }
 }
 
-export function getHtml(parsedReq: ParsedRequest) {
-    const { text, realName, username, cve, repoOwner, repoName, score } = parsedReq;
-    const severityColour = getSeverityColour(score);
+function getAdvisoryHtml(parsedReq: ParsedRequest) {
+  const { text, realName, username, cve, repoOwner, repoName, score } = parsedReq;
+  const severityColour = getSeverityColour(score);
     const cveHtml =`<h1 class="cve" style="background-color: ${severityColour}49; border: 1.5px solid ${severityColour};">
                         ${cve}
                     </h1>`
@@ -124,4 +124,21 @@ export function getHtml(parsedReq: ParsedRequest) {
       </body>
     </html>`
     return html;
+}
+
+function getProfileHtml(parsedReq: ParsedRequest) {
+  console.log(parsedReq)
+  return 'TODO :)'
+}
+
+export function getHtml(parsedReq: ParsedRequest) {
+    const { page } = parsedReq
+    switch (page) {
+      case 'advisory':
+        return getAdvisoryHtml(parsedReq)
+      case 'profile':
+        return getProfileHtml(parsedReq)
+      default:
+        return '<body style="margin: 0; height: 100%;"><img src="https://huntr.dev/img/og_image.png"></img></body>'
+    };
 }
