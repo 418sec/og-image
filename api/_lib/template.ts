@@ -73,18 +73,18 @@ function getSeverityColour(score: Number) {
     }
 }
 
-function getTierColour(tier: String) {
-  switch (true) {
-      case tier === 'legend':
-        return '#ff0000'
-      case tier === 'legend':
-        return '#ff9d00'
-      case tier === 'legend':
-        return '#fbff00'
-      default: 
-        return '#ffffff'
-  }
-}
+// function getTierColour(tier: String) {
+//   switch (true) {
+//       case tier === 'legend':
+//         return '#ff0000'
+//       case tier === 'legend':
+//         return '#ff9d00'
+//       case tier === 'legend':
+//         return '#fbff00'
+//       default: 
+//         return '#ffffff'
+//   }
+// }
 
 function getAdvisoryHtml(parsedReq: ParsedRequest) {
   const { text, realName, username, cve, repoOwner, repoName, score } = parsedReq;
@@ -139,17 +139,17 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
   return html;
 }
 
-function getProfileHtml(parsedReq: ParsedRequest) {
-  const { country, tier, vulnerabilityCount, fixCount, hallOfFame, badges } = parsedReq;
-  // const tierColour = getTierColour(tier)
-  const html = ''
+// function getProfileHtml(parsedReq: ParsedRequest) {
+//   const { country, tier, vulnerabilityCount, fixCount, hallOfFame, badges } = parsedReq;
+//   // const tierColour = getTierColour(tier)
+//   const html = ''
 
-  // brand url: https://huntr.dev/brands/alibaba.png
+//   // brand url: https://huntr.dev/brands/alibaba.png
   
-  // TODO: get badge colour codes
+//   // TODO: get badge colour codes
 
-  return 'TODO :)'
-}
+//   return 'TODO :)'
+// }
 
 export function getHtml(parsedReq: ParsedRequest) {
     const { page } = parsedReq
@@ -157,7 +157,7 @@ export function getHtml(parsedReq: ParsedRequest) {
       case 'advisory':
         return getAdvisoryHtml(parsedReq)
       case 'profile':
-        return getProfileHtml(parsedReq)
+        return 'coming soon :)' // getProfileHtml(parsedReq)
       default:
         return '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>'
     };
