@@ -5,7 +5,7 @@ import { ParsedRequest } from './types';
 export function parseRequest(req: IncomingMessage) {
     console.log('HTTP ' + req.url);
     const { pathname, query } = parse(req.url || '/', true);
-    const { page, realName, username, cve, repoOwner, repoName, score } = (query || {});
+    const { page, realName, username, cve, repoOwner, repoName, score, country, tier, cveCount, vulnerabilityCount, fixCount, hallOfFame, badges } = (query || {});
     
     const arr = (pathname || '/').slice(1).split('.');
     let extension = '';
@@ -28,7 +28,14 @@ export function parseRequest(req: IncomingMessage) {
         cve: String(cve),
         repoOwner: String(repoOwner),
         repoName: String(repoName),
-        score: Number(score)
+        score: Number(score),
+        country: String(country),
+        tier: String(tier),
+        cveCount: Number(cveCount),
+        vulnerabilityCount: Number(vulnerabilityCount), 
+        fixCount: Number(fixCount), 
+        hallOfFame: (hallOfFame as string).split('|'),
+        badges: (badges as string).split('|')
     };
 
     return parsedRequest;

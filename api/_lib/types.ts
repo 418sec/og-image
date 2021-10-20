@@ -10,4 +10,6 @@ export interface ParsedRequest {
     repoOwner: string;
     repoName: string;
     score: Number;
+    hallOfFame: string | string[];    
+    badges: string | string[];
 }

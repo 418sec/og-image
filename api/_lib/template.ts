@@ -63,71 +63,91 @@ function getCss() {
 function getSeverityColour(score: Number) {
     switch (true) {
         case score > 7.5:
-            return '#ff0000'
+          return '#ff0000'
         case score > 5.0:
-            return '#ff9d00'
+          return '#ff9d00'
         case score > 2.5:
-            return '#fbff00'
+          return '#fbff00'
         default: 
-            return '#ffffff'
+          return '#ffffff'
     }
+}
+
+function getTierColour(tier: String) {
+  switch (true) {
+      case tier === 'legend':
+        return '#ff0000'
+      case tier === 'legend':
+        return '#ff9d00'
+      case tier === 'legend':
+        return '#fbff00'
+      default: 
+        return '#ffffff'
+  }
 }
 
 function getAdvisoryHtml(parsedReq: ParsedRequest) {
   const { text, realName, username, cve, repoOwner, repoName, score } = parsedReq;
   const severityColour = getSeverityColour(score);
-    const cveHtml =`<h1 class="cve" style="background-color: ${severityColour}49; border: 1.5px solid ${severityColour};">
-                        ${cve}
-                    </h1>`
+  const cveHtml =`<h1 class="cve" style="background-color: ${severityColour}49; border: 1.5px solid ${severityColour};">
+                      ${cve}
+                  </h1>`
 
-    let html = `<!DOCTYPE html>
-    <html>
-        <head>
-            <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Lato"/>
-            <meta charset="utf-8">
-            <title>huntr.dev</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <style>
-                ${getCss()}
-            </style>
-        </head>
-        <body>
-        <div class="wrapper">
-          <div class="left-side">
-            <p class="caption">Security Advisory in ${repoOwner} / ${repoName}</p>
-            <h1 class="cwe">
-                ${text}
-            </h1>`
-            if(cve) html += cveHtml
-            html +=`
-          </div>
-          <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
+  let html = `<!DOCTYPE html>
+  <html>
+      <head>
+          <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Lato"/>
+          <meta charset="utf-8">
+          <title>huntr.dev</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+              ${getCss()}
+          </style>
+      </head>
+      <body>
+      <div class="wrapper">
+        <div class="left-side">
+          <p class="caption">Security Advisory in ${repoOwner} / ${repoName}</p>
+          <h1 class="cwe">
+              ${text}
+          </h1>`
+          if(cve) html += cveHtml
+          html +=`
         </div>
-        <div
-          style="display: flex; flex-direction: row; width: 100%; margin-top: 10px"
-        >
-          <p class="author">
-            By @${username} (<span class="name">${realName}</span>)
-          </p>
-          <img
-            style="
-              border-radius: 100%;
-              width: 50px;
-              height: 50px;
-              margin-left: auto;
-            "
-            src="https://github.com/${username}.png"
-          />
-        </div>
-      </body>
-    </html>`
-    return html;
+        <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
+      </div>
+      <div
+        style="display: flex; flex-direction: row; width: 100%; margin-top: 10px"
+      >
+        <p class="author">
+          By @${username} (<span class="name">${realName}</span>)
+        </p>
+        <img
+          style="
+            border-radius: 100%;
+            width: 50px;
+            height: 50px;
+            margin-left: auto;
+          "
+          src="https://github.com/${username}.png"
+        />
+      </div>
+    </body>
+  </html>`
+  return html;
 }
 
 function getProfileHtml(parsedReq: ParsedRequest) {
-  console.log(parsedReq)
+  const { country, tier, vulnerabilityCount, fixCount, hallOfFame, badges } = parsedReq;
+  // const tierColour = getTierColour(tier)
+  const html = ''
+
+  // brand url: https://huntr.dev/brands/alibaba.png
+  
+  // TODO: get badge colour codes
+
   return 'TODO :)'
 }
 
@@ -139,6 +159,6 @@ export function getHtml(parsedReq: ParsedRequest) {
       case 'profile':
         return getProfileHtml(parsedReq)
       default:
-        return '<body style="margin: 0; height: 100%;"><img src="https://huntr.dev/img/og_image.png"></img></body>'
+        return '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>'
     };
 }
