@@ -1,34 +1,36 @@
-import { ParsedRequest } from './types';
+import { ParsedRequest } from "./types";
 
 function getCss() {
-    return `
+  return `
     body {
         font-family: "Lato", serif;
         background-color: black;
         color: white;
-        padding: 32px;
+        padding: 4rem;
         padding-right: 0px;
         position: relative;
+        height: 100vh;
       }
 
       .caption {
         opacity: 70%;
-        font-size: small;
+        font-size: 2rem;
         margin: 0;
+        margin-bottom: 1rem;
       }
 
       .cve {
-        border-radius: 4px;
-        padding: 2px 10px;
+        border-radius: 10px;
+        padding: 0.3rem 2rem 0.5rem 2rem;
         display: inline-block;
-        font-size: small;
+        font-size: 2rem;
         margin: 0;
       }
 
       .cwe {
-        font-size: x-large;
+        font-size: 3.5rem;
         margin: 0;
-        margin-bottom: 10px;
+        margin-bottom: 3rem;
       }
 
       .left-side {
@@ -41,18 +43,19 @@ function getCss() {
       }
 
       .mouse {
-        height: 150px;
-        opacity: 20%;
+        height: 500px;
+        opacity: 10%;
         position: absolute;
-        right: -25px;
+        right: -2rem;
+        top: 2.5rem;
         z-index: -1;
       }
 
       .author {
         color: rgba(255, 255, 255, 0.7);
-        font-size: small;
-        margin-bottom: 0;
-        margin-top: 20px;
+        font-size: 2rem;
+        position: absolute;
+        bottom: 12rem;
       }
       
       .name {
@@ -61,16 +64,16 @@ function getCss() {
 }
 
 function getSeverityColour(score: Number) {
-    switch (true) {
-        case score > 7.5:
-          return '#ff0000'
-        case score > 5.0:
-          return '#ff9d00'
-        case score > 2.5:
-          return '#fbff00'
-        default: 
-          return '#ffffff'
-    }
+  switch (true) {
+    case score > 9:
+      return "#7C3AED";
+    case score > 7:
+      return "#DC2626";
+    case score > 4:
+      return "#FF8800";
+    default:
+      return "#FFD501";
+  }
 }
 
 // function getTierColour(tier: String) {
@@ -81,17 +84,18 @@ function getSeverityColour(score: Number) {
 //         return '#ff9d00'
 //       case tier === 'legend':
 //         return '#fbff00'
-//       default: 
+//       default:
 //         return '#ffffff'
 //   }
 // }
 
 function getAdvisoryHtml(parsedReq: ParsedRequest) {
-  const { text, realName, username, cve, repoOwner, repoName, score } = parsedReq;
+  const { text, realName, username, cve, repoOwner, repoName, score } =
+    parsedReq;
   const severityColour = getSeverityColour(score);
-  const cveHtml =`<h1 class="cve" style="background-color: ${severityColour}49; border: 1.5px solid ${severityColour};">
+  const cveHtml = `<h1 class="cve" style="background-color: ${severityColour}49; border: 4px solid ${severityColour};">
                       ${cve}
-                  </h1>`
+                  </h1>`;
 
   let html = `<!DOCTYPE html>
   <html>
@@ -107,35 +111,34 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
           </style>
       </head>
       <body>
-      <div class="wrapper">
         <div class="left-side">
           <p class="caption">Security Advisory in ${repoOwner} / ${repoName}</p>
           <h1 class="cwe">
               ${text}
-          </h1>`
-          if(cve) html += cveHtml
-          html +=`
-        </div>
-        <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
-      </div>
-      <div
-        style="display: flex; flex-direction: row; width: 100%; margin-top: 10px"
-      >
+          </h1>`;
+  if (cve) html += cveHtml;
+  html += `
+          <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
+      
         <p class="author">
           By @${username} (<span class="name">${realName}</span>)
         </p>
         <img
           style="
             border-radius: 100%;
-            width: 50px;
-            height: 50px;
-            margin-left: auto;
+            width: 180px;
+            height: 180px;
+            position: absolute;
+            bottom: 12rem;
+            right: 5rem;
           "
           src="https://github.com/${username}.png"
         />
-      </div>
+        </div>
+
+
     </body>
-  </html>`
+  </html>`;
   return html;
 }
 
@@ -145,20 +148,20 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
 //   const html = ''
 
 //   // brand url: https://huntr.dev/brands/alibaba.png
-  
+
 //   // TODO: get badge colour codes
 
 //   return 'TODO :)'
 // }
 
 export function getHtml(parsedReq: ParsedRequest) {
-    const { page } = parsedReq
-    switch (page) {
-      case 'advisory':
-        return getAdvisoryHtml(parsedReq)
-      case 'profile':
-        return 'coming soon :)' // getProfileHtml(parsedReq)
-      default:
-        return '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>'
-    };
+  const { page } = parsedReq;
+  switch (page) {
+    case "advisory":
+      return getAdvisoryHtml(parsedReq);
+    case "profile":
+      return "coming soon :)"; // getProfileHtml(parsedReq)
+    default:
+      return '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>';
+  }
 }
