@@ -129,8 +129,8 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
             width: 180px;
             height: 180px;
             position: absolute;
-            bottom: 12rem;
-            right: 5rem;
+            bottom: 14rem;
+            right: 8rem;
           "
           src="https://github.com/${username}.png"
         />
