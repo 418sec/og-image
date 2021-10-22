@@ -8,9 +8,12 @@
   },
   "dependencies": {
     "chrome-aws-lambda": "7.0.0",
+    "graphql": "^15.6.1",
+    "graphql-request": "^3.6.1",
     "marked": "2.0.0",
     "puppeteer-core": "7.0.0",
-    "twemoji": "13.0.1"
+    "twemoji": "13.0.1",
+    "vuln-vects": "^1.0.0"
   },
   "devDependencies": {
     "@types/marked": "1.2.2",

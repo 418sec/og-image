@@ -1,4 +1,6 @@
-import { ParsedRequest } from "./types";
+import { ParsedRequest, vector } from "./types";
+import { request, gql } from 'graphql-request'
+import { parseCvss3Vector } from 'vuln-vects';
 
 function getCss() {
   return `
@@ -76,27 +78,68 @@ function getSeverityColour(score: Number) {
   }
 }
 
-// function getTierColour(tier: String) {
-//   switch (true) {
-//       case tier === 'legend':
-//         return '#ff0000'
-//       case tier === 'legend':
-//         return '#ff9d00'
-//       case tier === 'legend':
-//         return '#fbff00'
-//       default:
-//         return '#ffffff'
-//   }
-// }
+async function getVulnerability(id: string) {
+  const query = gql `query GetVulnerability($id: ID!) {
+    query: getVulnerability(id: $id) {
+      id
+      _author {
+        id
+        name
+        preferred_username
+      }
+      repository {
+        id
+        name
+        owner
+      }
+      cvss {
+        attack_complexity
+        attack_vector
+        availability
+        confidentiality
+        integrity
+        privileges_required
+        scope
+        user_interaction
+      }
+      cve {
+        id
+      }
+      cwe {
+        id
+        description
+        title
+      }
+    }
+  }
+  `
+  const vulnerability = await request('https://mnk2smepzzdp5djxpbthzr6odq.appsync-api.eu-west-1.amazonaws.com/graphql', query, { id }, { 'X-API-KEY': 'da2-fql7xoajcng6pilmew4lfbi6ga'}).then(response => response.query);
+  return vulnerability;
+}
 
-function getAdvisoryHtml(parsedReq: ParsedRequest) {
-  const { text, realName, username, cve, repoOwner, repoName, score } =
-    parsedReq;
-  const severityColour = getSeverityColour(score);
+function cvssScore(vectors: vector) {
+  const {
+    attack_complexity,
+    attack_vector,
+    availability,
+    confidentiality,
+    integrity,
+    privileges_required,
+    scope,
+    user_interaction
+  } = vectors;
+
+  const score = parseCvss3Vector(`AV:${attack_vector}/AC:${attack_complexity}/PR:${privileges_required}/UI:${user_interaction}/S:${scope}/C:${confidentiality}/I:${integrity}/A:${availability}`).overallScore; 
+  return score;
+}
+
+async function getAdvisoryHtml(parsedReq: ParsedRequest) {
+  const { id } = parsedReq;
+  const vulnerability = await getVulnerability(id);
+  const severityColour = getSeverityColour(cvssScore(vulnerability.cvss)); 
   const cveHtml = `<h1 class="cve" style="background-color: ${severityColour}49; border: 4px solid ${severityColour};">
-                      ${cve}
+                      ${vulnerability.cve?.id}
                   </h1>`;
-
   let html = `<!DOCTYPE html>
   <html>
       <head>
@@ -112,16 +155,16 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
       </head>
       <body>
         <div class="left-side">
-          <p class="caption">Security Advisory in ${repoOwner} / ${repoName}</p>
+          <p class="caption">Security Advisory in ${vulnerability.repository.owner} / ${vulnerability.repository.name}</p>
           <h1 class="cwe">
-              ${text}
+              ${vulnerability.cwe.description || vulnerability.cwe.title}
           </h1>`;
-  if (cve) html += cveHtml;
-  html += `
+        if (vulnerability.cve) html += cveHtml;
+        html += `
           <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
       
         <p class="author">
-          By @${username} (<span class="name">${realName}</span>)
+          By @${vulnerability._author.preferred_username} (<span class="name">${vulnerability._author.name}</span>)
         </p>
         <img
           style="
@@ -130,9 +173,9 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
             height: 180px;
             position: absolute;
             bottom: 14rem;
-            right: 8rem;
+            right: 8.2rem;
           "
-          src="https://github.com/${username}.png"
+          src="https://github.com/${vulnerability._author.preferred_username}.png"
         />
         </div>
 
@@ -142,26 +185,19 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
   return html;
 }
 
-// function getProfileHtml(parsedReq: ParsedRequest) {
-//   const { country, tier, vulnerabilityCount, fixCount, hallOfFame, badges } = parsedReq;
-//   // const tierColour = getTierColour(tier)
-//   const html = ''
-
-//   // brand url: https://huntr.dev/brands/alibaba.png
-
-//   // TODO: get badge colour codes
-
-//   return 'TODO :)'
-// }
-
-export function getHtml(parsedReq: ParsedRequest) {
+export async function getHtml(parsedReq: ParsedRequest) {
   const { page } = parsedReq;
+  let response = '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>';
   switch (page) {
     case "advisory":
-      return getAdvisoryHtml(parsedReq);
+      response = await getAdvisoryHtml(parsedReq);
+      break;
     case "profile":
-      return "coming soon :)"; // getProfileHtml(parsedReq)
+      response = "coming soon :)"; 
+      break;
     default:
-      return '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>';
-  }
+      response;
+      break;
+    }
+  return response;
 }
