@@ -14,6 +14,9 @@ export interface ParsedRequest {
     tier: string;
     cveCount: Number;
     vulnerabilityCount: Number;
+    occurences: Number;
+    severity: Number;
+    popularity: Number;
     fixCount: Number;
     hallOfFame: string | string[];    
     badges: string | string[];

@@ -7,60 +7,80 @@ function getCss() {
         background-color: black;
         color: white;
         padding: 4rem;
-        padding-right: 0px;
-        position: relative;
-        height: 100vh;
+      margin: 0;
+height: 492px;
+  display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box; /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox; /* TWEENER - IE 10 */
+  display: -webkit-flex; /* NEW - Chrome */
+  display: flex; /* NEW, Spec - Opera 12.1, Firefox 20+ */
+  -ms-flex-direction: column;
+  -moz-flex-direction: column;
+  -webkit-flex-direction: column;
+  flex-direction: column;
       }
 
       .caption {
-        opacity: 70%;
-        font-size: 2rem;
+        opacity: 50%;
+        font-size: 1.6rem;
         margin: 0;
-        margin-bottom: 1rem;
-      }
-
-      .cve {
-        border-radius: 10px;
-        padding: 0.3rem 2rem 0.5rem 2rem;
-        display: inline-block;
-        font-size: 2rem;
-        margin: 0;
+        width: 75%;
       }
 
       .cwe {
-        font-size: 3.5rem;
+        font-size: 3rem;
         margin: 0;
-        margin-bottom: 3rem;
+        margin-top: 1rem;
+        width: 75%;
       }
 
-      .left-side {
-        width: 66%;
+            .author {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 1.6rem;
+}
+
+      .cve {
+
+width: 100%;
+text-align: right;
+font-size: 1.7rem;
+margin-top: 0px;
       }
 
-      .wrapper {
-        display: flex;
-        flex-direction: row;
+            
+      .name {
+        color: rgb(255, 255, 255);
+        font-weight: 600;
       }
 
       .mouse {
-        height: 500px;
-        opacity: 10%;
+        height: 100px;
         position: absolute;
-        right: -2rem;
+        right: 2rem;
         top: 2.5rem;
         z-index: -1;
-      }
-
-      .author {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 2rem;
-        position: absolute;
-        bottom: 12rem;
+        opacity: 50%;
       }
       
-      .name {
-        color: rgb(255, 255, 255);
-      }`;
+      .avatar{
+          border-radius: 100%;
+          border: 6px solid black;
+          width: 150px;
+          height: 150px;
+          position: absolute;
+          top: 5.2rem;
+          right: 4rem;
+      }
+
+      .stat-column {
+        display: flex; flex-direction: column; margin-right: 4rem;
+      }
+
+      .stat-description {
+        opacity: 50%; font-size: 1.6rem; margin-top: 0.5rem;
+      }
+      
+      `;
 }
 
 function getSeverityColour(score: Number) {
@@ -90,12 +110,22 @@ function getSeverityColour(score: Number) {
 // }
 
 function getAdvisoryHtml(parsedReq: ParsedRequest) {
-  const { text, realName, username, cve, repoOwner, repoName, score } =
-    parsedReq;
+  const {
+    text,
+    realName,
+    username,
+    cve,
+    repoOwner,
+    repoName,
+    score,
+    severity,
+    popularity,
+    occurences,
+  } = parsedReq;
   const severityColour = getSeverityColour(score);
-  const cveHtml = `<h1 class="cve" style="background-color: ${severityColour}49; border: 4px solid ${severityColour};">
+  const cveHtml = `<h1 class="cve" >
                       ${cve}
-                  </h1>`;
+  </h1>`;
 
   let html = `<!DOCTYPE html>
   <html>
@@ -103,6 +133,10 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
           <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css?family=Lato"/>
+          <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"/>
+        
           <meta charset="utf-8">
           <title>huntr.dev</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -110,31 +144,44 @@ function getAdvisoryHtml(parsedReq: ParsedRequest) {
               ${getCss()}
           </style>
       </head>
-      <body>
-        <div class="left-side">
-          <p class="caption">Security Advisory in ${repoOwner} / ${repoName}</p>
+      <body >
+
+          <p class="caption">Security Advisory in ${repoOwner} / ${repoName} </p>
           <h1 class="cwe">
               ${text}
-          </h1>`;
-  if (cve) html += cveHtml;
-  html += `
-          <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
-      
+          </h1>
         <p class="author">
-          By @${username} (<span class="name">${realName}</span>)
+          by ${realName} –  @${username} 
         </p>
+          <div style="-webkit-box-flex: 1;  -moz-box-flex: 1;  -webkit-flex: 1; -ms-flex: 1; flex: 1; ">
+
+
+</div>
+          <img class="mouse" src="https://i.ibb.co/2NzwSSz/mouse-no-shadow.png" />
+
         <img
-          style="
-            border-radius: 100%;
-            width: 180px;
-            height: 180px;
-            position: absolute;
-            bottom: 14rem;
-            right: 8rem;
-          "
+          class="avatar"
           src="https://github.com/${username}.png"
         />
+
+        <div  style="display: flex; flex-direction: row; font-size: 1.7rem; border-top: 4px solid ${severityColour}; padding-top: 1.5rem;"> 
+          <div class="stat-column">
+           <span ><i class="fas fa-signal" style="margin-right: 1.5rem;"></i>Top ${popularity}%</span>  
+           <span class="stat-description" style="padding-left: 3.6rem;">Popularity</span>
+          </div>
+          <div class="stat-column">
+            <span><i class="fas fa-radiation" style="margin-right: 1.5rem;"></i>${severity}/5</span>
+            <span class="stat-description" style="padding-left: 3.3rem;">Severity</span>
+          </div><div class="stat-column">
+            <span><i class="fas fa-crosshairs" style="margin-right: 1.5rem;"></i>${occurences}</span>
+            <span class="stat-description" style="padding-left: 3.3rem;">Occurences</span>
+          </div>
+                    `;
+  if (cve) html += cveHtml;
+  html += `
         </div>
+
+    
 
 
     </body>
