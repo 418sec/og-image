@@ -1,68 +1,86 @@
-import { ParsedRequest, vector } from "./types";
-import { request, gql } from 'graphql-request'
-import { parseCvss3Vector } from 'vuln-vects';
+import { ParsedRequest, vector, permalink } from "./types";
+import { request, gql } from "graphql-request";
+import { parseCvss3Vector } from "vuln-vects";
 
 function getCss() {
   return `
-    body {
+   body {
         font-family: "Lato", serif;
         background-color: black;
         color: white;
         padding: 4rem;
-        padding-right: 0px;
-        position: relative;
-        height: 100vh;
+        margin: 0;
+        height: 492px;
+        display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6 */
+        display: -moz-box; /* OLD - Firefox 19- (buggy but mostly works) */
+        display: -ms-flexbox; /* TWEENER - IE 10 */
+        display: -webkit-flex; /* NEW - Chrome */
+        display: flex; /* NEW, Spec - Opera 12.1, Firefox 20+ */
+       -ms-flex-direction: column;
+       -moz-flex-direction: column;
+       -webkit-flex-direction: column;
+        flex-direction: column;
       }
 
       .caption {
-        opacity: 70%;
-        font-size: 2rem;
+        opacity: 50%;
+        font-size: 1.6rem;
         margin: 0;
-        margin-bottom: 1rem;
-      }
-
-      .cve {
-        border-radius: 10px;
-        padding: 0.3rem 2rem 0.5rem 2rem;
-        display: inline-block;
-        font-size: 2rem;
-        margin: 0;
+        width: 75%;
       }
 
       .cwe {
-        font-size: 3.5rem;
+        font-size: 3rem;
         margin: 0;
-        margin-bottom: 3rem;
+        margin-top: 1rem;
+        width: 75%;
       }
 
-      .left-side {
-        width: 66%;
+            .author {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 1.6rem;
+}
+
+      .cve {
+     width: 100%;
+     text-align: right;
+     font-size: 1.7rem;
+      margin-top: 0px;
       }
 
-      .wrapper {
-        display: flex;
-        flex-direction: row;
+            
+      .name {
+        color: rgb(255, 255, 255);
+        font-weight: 600;
       }
 
       .mouse {
-        height: 500px;
-        opacity: 10%;
+        height: 100px;
         position: absolute;
-        right: -2rem;
+        right: 2rem;
         top: 2.5rem;
         z-index: -1;
-      }
-
-      .author {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 2rem;
-        position: absolute;
-        bottom: 12rem;
+        opacity: 50%;
       }
       
-      .name {
-        color: rgb(255, 255, 255);
-      }`;
+      .avatar{
+          border-radius: 100%;
+          border: 6px solid black;
+          width: 150px;
+          height: 150px;
+          position: absolute;
+          top: 5.2rem;
+          right: 4rem;
+      }
+
+      .stat-column {
+        display: flex; flex-direction: column; margin-right: 4rem;
+      }
+
+      .stat-description {
+        opacity: 50%; font-size: 1.6rem; margin-top: 0.5rem;
+      }
+      `;
 }
 
 function getSeverityColour(score: Number) {
@@ -78,42 +96,71 @@ function getSeverityColour(score: Number) {
   }
 }
 
+function getSeverityScore(score: Number) {
+  switch (true) {
+    case score === 1:
+      return 5;
+    case score === 0.8:
+      return 4;
+    case score === 0.5:
+      return 3;
+    case score === 0.3:
+      return 2;
+    case score === 0.1:
+      return 1;
+    default:
+      return 0;
+  }
+}
+
 async function getVulnerability(id: string) {
-  const query = gql `query GetVulnerability($id: ID!) {
-    query: getVulnerability(id: $id) {
-      id
-      _author {
+  const query = gql`
+    query GetVulnerability($id: ID!) {
+      query: getVulnerability(id: $id) {
         id
-        name
-        preferred_username
-      }
-      repository {
-        id
-        name
-        owner
-      }
-      cvss {
-        attack_complexity
-        attack_vector
-        availability
-        confidentiality
-        integrity
-        privileges_required
-        scope
-        user_interaction
-      }
-      cve {
-        id
-      }
-      cwe {
-        id
-        description
-        title
+        _author {
+          id
+          name
+          preferred_username
+        }
+        repository {
+          id
+          name
+          owner
+        }
+        cvss {
+          attack_complexity
+          attack_vector
+          availability
+          confidentiality
+          integrity
+          privileges_required
+          scope
+          user_interaction
+        }
+        cve {
+          id
+        }
+        cwe {
+          id
+          description
+          title
+          pricing_multiplier
+        }
+        new_permalinks {
+          items {
+            status
+          }
+        }
       }
     }
-  }
-  `
-  const vulnerability = await request('https://mnk2smepzzdp5djxpbthzr6odq.appsync-api.eu-west-1.amazonaws.com/graphql', query, { id }, { 'X-API-KEY': 'da2-fql7xoajcng6pilmew4lfbi6ga'}).then(response => response.query);
+  `;
+  const vulnerability = await request(
+    "https://mnk2smepzzdp5djxpbthzr6odq.appsync-api.eu-west-1.amazonaws.com/graphql",
+    query,
+    { id },
+    { "X-API-KEY": "da2-fql7xoajcng6pilmew4lfbi6ga" }
+  ).then((response) => response.query);
   return vulnerability;
 }
 
@@ -126,18 +173,24 @@ function cvssScore(vectors: vector) {
     integrity,
     privileges_required,
     scope,
-    user_interaction
+    user_interaction,
   } = vectors;
 
-  const score = parseCvss3Vector(`AV:${attack_vector}/AC:${attack_complexity}/PR:${privileges_required}/UI:${user_interaction}/S:${scope}/C:${confidentiality}/I:${integrity}/A:${availability}`).overallScore; 
+  const score = parseCvss3Vector(
+    `AV:${attack_vector}/AC:${attack_complexity}/PR:${privileges_required}/UI:${user_interaction}/S:${scope}/C:${confidentiality}/I:${integrity}/A:${availability}`
+  ).overallScore;
   return score;
 }
 
 async function getAdvisoryHtml(parsedReq: ParsedRequest) {
   const { id } = parsedReq;
   const vulnerability = await getVulnerability(id);
-  const severityColour = getSeverityColour(cvssScore(vulnerability.cvss)); 
-  const cveHtml = `<h1 class="cve" style="background-color: ${severityColour}49; border: 4px solid ${severityColour};">
+  const severityColour = getSeverityColour(cvssScore(vulnerability.cvss));
+  const severityScore = getSeverityScore(vulnerability.cwe.pricing_multiplier);
+  const occurences = vulnerability?.new_permalinks?.items?.filter(
+    (permalink: permalink) => permalink?.status === "valid"
+  );
+  const cveHtml = `<h1 class="cve">
                       ${vulnerability.cve?.id}
                   </h1>`;
   let html = `<!DOCTYPE html>
@@ -146,6 +199,10 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
           <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css?family=Lato"/>
+          <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"/>
+        
           <meta charset="utf-8">
           <title>huntr.dev</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -153,33 +210,48 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
               ${getCss()}
           </style>
       </head>
-      <body>
-        <div class="left-side">
-          <p class="caption">Security Advisory in ${vulnerability.repository.owner} / ${vulnerability.repository.name}</p>
+      <body >
+
+          <p class="caption">Security Advisory in ${
+            vulnerability.repository.owner
+          } / ${vulnerability.repository.name} </p>
           <h1 class="cwe">
               ${vulnerability.cwe.description || vulnerability.cwe.title}
-          </h1>`;
-        if (vulnerability.cve) html += cveHtml;
-        html += `
-          <img class="mouse" src="https://huntr.dev/_nuxt/image/1329be.svg" />
-      
+          </h1>
         <p class="author">
-          By @${vulnerability._author.preferred_username} (<span class="name">${vulnerability._author.name}</span>)
+          by ${vulnerability._author.name} –  @${
+    vulnerability._author.preferred_username
+  } 
         </p>
+          <div style="-webkit-box-flex: 1;  -moz-box-flex: 1;  -webkit-flex: 1; -ms-flex: 1; flex: 1; ">
+
+
+</div>
+          <img class="mouse" src="https://i.ibb.co/2NzwSSz/mouse-no-shadow.png" />
+
         <img
-          style="
-            border-radius: 100%;
-            width: 180px;
-            height: 180px;
-            position: absolute;
-            bottom: 14rem;
-            right: 8.2rem;
-          "
-          src="https://github.com/${vulnerability._author.preferred_username}.png"
+          class="avatar"
+          src="https://github.com/${
+            vulnerability._author.preferred_username
+          }.png"
         />
+
+        <div  style="display: flex; flex-direction: row; font-size: 1.7rem; border-top: 4px solid ${severityColour}; padding-top: 1.5rem;"> 
+          <div class="stat-column">
+           <span ><i class="fas fa-signal" style="margin-right: 1.5rem;"></i>Top 34%</span>  
+           <span class="stat-description" style="padding-left: 3.6rem;">Popularity</span>
+          </div>
+          <div class="stat-column">
+            <span><i class="fas fa-radiation" style="margin-right: 1.5rem;"></i>${severityScore}/5</span>
+            <span class="stat-description" style="padding-left: 3.3rem;">Severity</span>
+          </div><div class="stat-column">
+            <span><i class="fas fa-crosshairs" style="margin-right: 1.5rem;"></i>${occurences}</span>
+            <span class="stat-description" style="padding-left: 3.3rem;">Occurences</span>
+          </div>
+                    `;
+  if (vulnerability.cve) html += cveHtml;
+  html += `
         </div>
-
-
     </body>
   </html>`;
   return html;
@@ -187,17 +259,18 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
 
 export async function getHtml(parsedReq: ParsedRequest) {
   const { page } = parsedReq;
-  let response = '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>';
+  let response =
+    '<body style="margin: 0; height: 100%; background-color: black;"><img src="https://huntr.dev/img/og_image.png"></img></body>';
   switch (page) {
     case "advisory":
       response = await getAdvisoryHtml(parsedReq);
       break;
     case "profile":
-      response = "coming soon :)"; 
+      response = "coming soon :)";
       break;
     default:
       response;
       break;
-    }
+  }
   return response;
 }
