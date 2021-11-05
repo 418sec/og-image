@@ -1,6 +1,6 @@
-import { IncomingMessage } from 'http';
-import { parse } from 'url';
-import { ParsedRequest } from './types';
+import { IncomingMessage } from "http";
+import { parse } from "url";
+import { ParsedRequest } from "./types";
 
 export function parseRequest(req: IncomingMessage) {
     console.log('HTTP ' + req.url);
@@ -12,6 +12,5 @@ export function parseRequest(req: IncomingMessage) {
         page: String(page),
         id: String(id)
     };
-
-    return parsedRequest;
+  return parsedRequest;
 }
