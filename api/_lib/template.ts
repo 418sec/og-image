@@ -23,36 +23,34 @@ function getCss() {
       }
 
       .caption {
-        opacity: 50%;
-        font-size: 1.6rem;
+        opacity: 60%;
+        font-size: 1.8rem;
         margin: 0;
         width: 75%;
+
       }
 
       .cwe {
-        font-size: 3rem;
+        font-size: 3.4rem;
         margin: 0;
         margin-top: 1rem;
         width: 75%;
       }
 
             .author {
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 1.6rem;
+        color: white;
+        opacity: 60%;
+        font-size: 1.8rem;
 }
 
       .cve {
      width: 100%;
      text-align: right;
-     font-size: 1.7rem;
+     font-size: 1.8rem;
       margin-top: 0px;
       }
 
-            
-      .name {
-        color: rgb(255, 255, 255);
-        font-weight: 600;
-      }
+          
 
       .mouse {
         height: 100px;
@@ -64,13 +62,13 @@ function getCss() {
       }
       
       .avatar{
-          border-radius: 100%;
+        border-radius: 60%;
           border: 6px solid black;
-          width: 150px;
-          height: 150px;
+          width: 160px;
+          height: 160px;
           position: absolute;
-          top: 5.2rem;
-          right: 4rem;
+          top: 5.3rem;
+          right: 3.6rem;
       }
 
       .stat-column {
@@ -78,7 +76,7 @@ function getCss() {
       }
 
       .stat-description {
-        opacity: 50%; font-size: 1.6rem; margin-top: 0.5rem;
+        opacity: 50%; font-size: 1.7rem; margin-top: 0.5rem;
       }
       `;
 }
@@ -212,7 +210,7 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
       </head>
       <body >
 
-          <p class="caption">Security Advisory in ${
+          <p class="caption">Vulnerability in ${
             vulnerability.repository.owner
           } / ${vulnerability.repository.name} </p>
           <h1 class="cwe">
@@ -236,7 +234,7 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
           }.png"
         />
 
-        <div  style="display: flex; flex-direction: row; font-size: 1.7rem; border-top: 4px solid ${severityColour}; padding-top: 1.5rem;"> 
+        <div  style="display: flex; flex-direction: row; font-size: 1.8rem; border-top: 4px solid ${severityColour}; padding-top: 1.9rem;"> 
           <div class="stat-column">
            <span style="font-weight: 700;" ><i class="fas fa-signal" style="margin-right: 1.5rem;"></i>Top 34%</span>  
            <span class="stat-description" style="padding-left: 3.6rem;">Popularity</span>
