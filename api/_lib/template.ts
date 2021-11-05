@@ -1,4 +1,4 @@
-import { ParsedRequest, vector, permalink } from "./types";
+import { ParsedRequest, vector, permalink, response } from "./types";
 import { request, gql } from "graphql-request";
 import { parseCvss3Vector } from "vuln-vects";
 
@@ -160,7 +160,7 @@ async function getVulnerability(id: string) {
     query,
     { id },
     { "X-API-KEY": "da2-fql7xoajcng6pilmew4lfbi6ga" }
-  ).then((response) => response.query);
+  ).then((response: response) => response.query);
   return vulnerability;
 }
 
@@ -189,7 +189,7 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
   const severityScore = getSeverityScore(vulnerability.cwe.pricing_multiplier);
   const occurences = vulnerability?.new_permalinks?.items?.filter(
     (permalink: permalink) => permalink?.status === "valid"
-  );
+  ).length;
   const cveHtml = `<h1 class="cve">
                       ${vulnerability.cve?.id}
                   </h1>`;
@@ -219,9 +219,9 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
               ${vulnerability.cwe.description || vulnerability.cwe.title}
           </h1>
         <p class="author">
-          by ${vulnerability._author.name} –  @${
-    vulnerability._author.preferred_username
-  } 
+          by ${
+            vulnerability._author.name ? vulnerability._author.name + ` – ` : ``
+          } @${vulnerability._author.preferred_username} 
         </p>
           <div style="-webkit-box-flex: 1;  -moz-box-flex: 1;  -webkit-flex: 1; -ms-flex: 1; flex: 1; ">
 
@@ -238,14 +238,14 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
 
         <div  style="display: flex; flex-direction: row; font-size: 1.7rem; border-top: 4px solid ${severityColour}; padding-top: 1.5rem;"> 
           <div class="stat-column">
-           <span ><i class="fas fa-signal" style="margin-right: 1.5rem;"></i>Top 34%</span>  
+           <span style="font-weight: 700;" ><i class="fas fa-signal" style="margin-right: 1.5rem;"></i>Top 34%</span>  
            <span class="stat-description" style="padding-left: 3.6rem;">Popularity</span>
           </div>
           <div class="stat-column">
-            <span><i class="fas fa-radiation" style="margin-right: 1.5rem;"></i>${severityScore}/5</span>
+            <span style="font-weight: 700;"><i class="fas fa-radiation" style="margin-right: 1.5rem;"></i>${severityScore}/5</span>
             <span class="stat-description" style="padding-left: 3.3rem;">Severity</span>
           </div><div class="stat-column">
-            <span><i class="fas fa-crosshairs" style="margin-right: 1.5rem;"></i>${occurences}</span>
+            <span style="font-weight: 700;"><i class="fas fa-crosshairs" style="margin-right: 1.5rem;"></i>${occurences}</span>
             <span class="stat-description" style="padding-left: 3.3rem;">Occurences</span>
           </div>
                     `;
