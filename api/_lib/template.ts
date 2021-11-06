@@ -35,6 +35,8 @@ function getCss() {
         margin: 0;
         margin-top: 1rem;
         width: 75%;
+        display: flex;
+        min-height: 6.5rem;
       }
 
             .author {
@@ -214,7 +216,9 @@ async function getAdvisoryHtml(parsedReq: ParsedRequest) {
             vulnerability.repository.owner
           } / ${vulnerability.repository.name} </p>
           <h1 class="cwe">
+          <span style="align-self: center;">
               ${vulnerability.cwe.description || vulnerability.cwe.title}
+              </span>
           </h1>
         <p class="author">
           by ${
